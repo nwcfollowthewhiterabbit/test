@@ -1,0 +1,53 @@
+services:
+  # Nginx high performance web server
+  ad-marker-nginx:
+    container_name: ad-marker-nginx
+    restart: unless-stopped
+    depends_on:
+      - ad-marker
+    build: ./nginx
+    ports:
+      - ${WEB_PORT}:${WEB_PORT}
+    volumes:
+      - ./storage:/var/www/storage
+
+  # Golang binary ad-marker
+  ad-marker:
+    container_name: ad-marker
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - ad-marker-postgres
+    expose:
+      - ${WEB_PORT}
+    environment:
+      API_KEY: ${API_KEY}
+      WEB_PORT: ${WEB_PORT}
+      BASE_URL: ${BASE_URL}
+      EPG_URL: ${EPG_URL}
+      PLAYLIST_URL: ${PLAYLIST_URL}
+      PLAYLIST_TOKEN: ${PLAYLIST_TOKEN}
+      HLS_STORAGE_URL_MASK: ${HLS_STORAGE_URL_MASK}
+      STORAGE_PATH: ${STORAGE_PATH}
+      FFMPEG_PATH: ${FFMPEG_PATH}
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      DOCS_USERNAME: ${DOCS_USERNAME}
+      DOCS_PASSWORD: ${DOCS_PASSWORD}
+    volumes:
+      - ./storage:${STORAGE_PATH}
+
+  # Postgres: start Postgres, and ensure that data is stored to a mounted volume
+  ad-marker-postgres:
+    container_name: ad-marker-postgres
+    image: 'postgres:15.2'
+    expose:
+      - ${POSTGRES_PORT}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./db/postgres/:/var/lib/postgresql/data/
