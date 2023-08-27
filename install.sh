@@ -1,9 +1,7 @@
 #!/bin/bash
-
-github_url="https://github.com/nwcfollowthewhiterabbit/test.git"
-mkdir /web.app
-chmod 777 /web.app
-target_directory="/web.app/"
-#target_directory="/путь/к/целевой/папке"
-git clone $github_url $target_directory
-echo "Папка скопирована из GitHub."
+sudo apt update && apt upgrade -y && sudo apt install nodejs nginx npm -y
+sudo mkdir /web.app
+sudo git clone https://github.com/nwcfollowthewhiterabbit/test.git /web.app/
+cd /web.app/
+sudo sh install-back.sh
+sudo sh install-front.sh
